@@ -1,6 +1,0 @@
-logging:
-  level:
-    com.example.todo: WARN
-    org.springframework: WARN
-server:
-  port: 8080
