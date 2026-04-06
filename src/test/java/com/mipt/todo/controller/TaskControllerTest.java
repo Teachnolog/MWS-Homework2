@@ -2,6 +2,7 @@ package com.mipt.todo.controller;
 
 import com.mipt.todo.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ class TaskControllerTest {
 
     ResponseEntity<Task> response = restTemplate.postForEntity("/api/tasks", task, Task.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    Assertions.assertNotNull(response.getBody());
     createdTaskId = response.getBody().getId();
   }
 
