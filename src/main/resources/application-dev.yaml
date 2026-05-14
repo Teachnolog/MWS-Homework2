@@ -1,0 +1,4 @@
+logging:
+  level:
+    com.mipt.todo: DEBUG
+    org.springframework: DEBUG
