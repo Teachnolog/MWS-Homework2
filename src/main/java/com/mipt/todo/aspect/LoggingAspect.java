@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+/**
+ * Aspect для логирования входа и выхода из методов сервисного слоя.
+ */
 @Aspect
 @Component
 public class LoggingAspect {
@@ -19,12 +22,16 @@ public class LoggingAspect {
   public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
     String methodName = joinPoint.getSignature().toShortString();
     Object[] args = joinPoint.getArgs();
-    log.debug(">>> Entering: {} with args: {}", methodName, Arrays.toString(args));
+    if (log.isDebugEnabled()) {
+      log.debug(">>> Entering: {} with args: {}", methodName, Arrays.toString(args));
+    }
     Object result = joinPoint.proceed();
-    if (result == null) {
-      log.debug("<<< Exiting:  {} with result: void", methodName);
-    } else {
-      log.debug("<<< Exiting:  {} with result: {}", methodName, result);
+    if (log.isDebugEnabled()) {
+      if (result == null) {
+        log.debug("<<< Exiting:  {} with result: void", methodName);
+      } else {
+        log.debug("<<< Exiting:  {} with result: {}", methodName, result);
+      }
     }
     return result;
   }

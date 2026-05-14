@@ -6,15 +6,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+/**
+ * BeanPostProcessor, который логирует создание и инициализацию сервисов и репозиториев задач.
+ */
 @Component
 public class TaskLifecycleProcessor implements BeanPostProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(TaskLifecycleProcessor.class);
 
   @Override
-  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+  public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName)
+      throws BeansException {
     if (bean instanceof TaskService || bean instanceof TaskRepository) {
       log.info("Before initialization of bean: '{}' ({})", beanName, bean.getClass().getSimpleName());
     }
@@ -22,7 +27,8 @@ public class TaskLifecycleProcessor implements BeanPostProcessor {
   }
 
   @Override
-  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+  public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName)
+      throws BeansException {
     if (bean instanceof TaskService || bean instanceof TaskRepository) {
       log.info("After initialization of bean: '{}' ({})", beanName, bean.getClass().getSimpleName());
     }

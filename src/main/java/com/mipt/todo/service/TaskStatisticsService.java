@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Сервис, демонстрирующий совместную работу основного и stub-репозиториев.
+ */
 @Service
 public class TaskStatisticsService {
 

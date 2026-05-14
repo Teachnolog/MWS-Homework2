@@ -13,4 +13,4 @@ spring:
 
 logging:
   level:
-    com.example.todo: INFO
+    com.mipt.todo: INFO

@@ -1,6 +1,6 @@
 logging:
   level:
-    com.example.todo: WARN
+    com.mipt.todo: WARN
     org.springframework: WARN
 server:
-  port: 8080
+  port: 8081

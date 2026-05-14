@@ -10,6 +10,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Основной репозиторий задач, хранящий данные в памяти.
+ */
 @Repository
 @Primary
 public class InMemoryTaskRepository implements TaskRepository {

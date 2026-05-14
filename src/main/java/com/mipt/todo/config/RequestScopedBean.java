@@ -8,6 +8,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Bean со scope request, создающий уникальный идентификатор и время старта запроса.
+ */
 @Component
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class RequestScopedBean {

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Stub-репозиторий с предзаполненными данными для демонстрации @Bean и @Qualifier.
+ */
 public class StubTaskRepository implements TaskRepository {
 
   private final List<Task> tasks = new ArrayList<>();

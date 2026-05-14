@@ -1,15 +1,15 @@
 package com.mipt.todo.config;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import java.util.UUID;
 
-@Component
-@Scope("prototype")
+/**
+ * Bean со scope prototype, генерирующий новый идентификатор для каждой инстанции.
+ */
 public class PrototypeScopedBean {
 
-  public String generateId() {
-    return UUID.randomUUID().toString();
+  public Long generateTaskId() {
+    UUID uuid = UUID.randomUUID();
+    long candidate = uuid.getMostSignificantBits() ^ uuid.getLeastSignificantBits();
+    return candidate == Long.MIN_VALUE ? 0L : Math.abs(candidate);
   }
 }

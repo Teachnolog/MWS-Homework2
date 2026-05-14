@@ -53,6 +53,25 @@ class TaskControllerTest {
   }
 
   @Test
+  void getStatistics_positive_returns200AndData() {
+    ResponseEntity<String> response = restTemplate.getForEntity("/api/tasks/statistics", String.class);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).contains("primaryRepositoryTaskCount");
+    assertThat(response.getBody()).contains("stubRepositoryTaskCount");
+  }
+
+  @Test
+  void getAllTasks_negative_unsupportedAccept_returns406() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(java.util.List.of(MediaType.APPLICATION_XML));
+
+    ResponseEntity<String> response = restTemplate.exchange(
+        "/api/tasks", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_ACCEPTABLE);
+  }
+
+  @Test
   void getTaskById_positive_found() {
     ResponseEntity<Task> response = restTemplate.getForEntity("/api/tasks/" + createdTaskId, Task.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

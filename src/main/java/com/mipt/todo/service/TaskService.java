@@ -1,11 +1,13 @@
 package com.mipt.todo.service;
 
+import com.mipt.todo.config.PrototypeScopedBean;
 import com.mipt.todo.model.Task;
 import com.mipt.todo.repository.TaskRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +16,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Сервис, который инкапсулирует бизнес-логику работы с задачами и кэшем
+ */
 @Service
 public class TaskService {
 
   private static final Logger log = LoggerFactory.getLogger(TaskService.class);
 
   private final TaskRepository taskRepository;
+  private final ObjectProvider<PrototypeScopedBean> prototypeScopedBeanProvider;
 
-  private Map<String, Task> taskCache = new ConcurrentHashMap<>();
+  private final Map<String, Task> taskCache = new ConcurrentHashMap<>();
 
   @Value("${app.name}")
   private String appName;
@@ -29,8 +35,10 @@ public class TaskService {
   @Value("${app.version}")
   private String appVersion;
 
-  public TaskService(TaskRepository taskRepository) {
+  public TaskService(TaskRepository taskRepository,
+      ObjectProvider<PrototypeScopedBean> prototypeScopedBeanProvider) {
     this.taskRepository = taskRepository;
+    this.prototypeScopedBeanProvider = prototypeScopedBeanProvider;
   }
 
   @PostConstruct
@@ -54,6 +62,9 @@ public class TaskService {
   }
 
   public Task createTask(Task task) {
+    if (task.getId() == null) {
+      task.setId(prototypeScopedBeanProvider.getObject().generateTaskId());
+    }
     Task saved = taskRepository.save(task);
     taskCache.put(String.valueOf(saved.getId()), saved);
     return saved;

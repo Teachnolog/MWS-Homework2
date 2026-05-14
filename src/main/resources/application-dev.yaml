@@ -1,4 +1,4 @@
 logging:
   level:
-    com.example.todo: DEBUG
+    com.mipt.todo: DEBUG
     org.springframework: DEBUG
