@@ -12,7 +12,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 /**
  * Маппер для конвертации между Task и DTO с использованием MapStruct.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {AttachmentMapper.class})
 public interface TaskMapper {
 
   /**

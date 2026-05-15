@@ -1,6 +1,7 @@
 package com.mipt.todo.service;
 
 import com.mipt.todo.repository.TaskRepository;
+import com.mipt.todo.repository.StubTaskRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,10 @@ import java.util.Map;
 public class TaskStatisticsService {
 
   private final TaskRepository primaryRepository;
-  private final TaskRepository stubRepository;
+  private final StubTaskRepository stubRepository;
 
   public TaskStatisticsService(TaskRepository primaryRepository,
-      @Qualifier("stubTaskRepository") TaskRepository stubRepository) {
+      @Qualifier("stubTaskRepository") StubTaskRepository stubRepository) {
     this.primaryRepository = primaryRepository;
     this.stubRepository = stubRepository;
   }
