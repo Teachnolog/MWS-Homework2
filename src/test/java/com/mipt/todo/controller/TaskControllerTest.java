@@ -1,6 +1,9 @@
 package com.mipt.todo.controller;
 
-import com.mipt.todo.model.Task;
+import com.mipt.todo.dto.TaskCreateDto;
+import com.mipt.todo.dto.TaskResponseDto;
+import com.mipt.todo.model.Priority;
+import com.mipt.todo.dto.TaskUpdateDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,12 +25,12 @@ class TaskControllerTest {
 
   @BeforeEach
   void setUp() {
-    Task task = new Task();
+    TaskCreateDto task = new TaskCreateDto();
     task.setTitle("Test Task");
     task.setDescription("Test Description");
-    task.setCompleted(false);
+    task.setPriority(Priority.MEDIUM);
 
-    ResponseEntity<Task> response = restTemplate.postForEntity("/api/tasks", task, Task.class);
+    ResponseEntity<TaskResponseDto> response = restTemplate.postForEntity("/api/tasks", task, TaskResponseDto.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     Assertions.assertNotNull(response.getBody());
     createdTaskId = response.getBody().getId();
@@ -35,12 +38,14 @@ class TaskControllerTest {
 
   @AfterEach
   void tearDown() {
-    restTemplate.delete("/api/tasks/" + createdTaskId);
+    ResponseEntity<Void> response = restTemplate.exchange(
+            "/api/tasks/" + createdTaskId, HttpMethod.DELETE, null, Void.class);
+    assertThat(response.getStatusCode()).isIn(HttpStatus.NO_CONTENT, HttpStatus.NOT_FOUND);
   }
 
   @Test
   void getAllTasks_positive_returns200AndList() {
-    ResponseEntity<Task[]> response = restTemplate.getForEntity("/api/tasks", Task[].class);
+    ResponseEntity<TaskResponseDto[]> response = restTemplate.getForEntity("/api/tasks", TaskResponseDto[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().length).isGreaterThan(0);
@@ -73,7 +78,7 @@ class TaskControllerTest {
 
   @Test
   void getTaskById_positive_found() {
-    ResponseEntity<Task> response = restTemplate.getForEntity("/api/tasks/" + createdTaskId, Task.class);
+    ResponseEntity<TaskResponseDto> response = restTemplate.getForEntity("/api/tasks/" + createdTaskId, TaskResponseDto.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getId()).isEqualTo(createdTaskId);
@@ -81,17 +86,18 @@ class TaskControllerTest {
 
   @Test
   void getTaskById_negative_notFound() {
-    ResponseEntity<Task> response = restTemplate.getForEntity("/api/tasks/999999", Task.class);
+    ResponseEntity<TaskResponseDto> response = restTemplate.getForEntity("/api/tasks/999999", TaskResponseDto.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void createTask_positive_returns201() {
-    Task task = new Task();
+    TaskCreateDto task = new TaskCreateDto();
     task.setTitle("New Task");
     task.setDescription("New Description");
+    task.setPriority(Priority.MEDIUM);
 
-    ResponseEntity<Task> response = restTemplate.postForEntity("/api/tasks", task, Task.class);
+    ResponseEntity<TaskResponseDto> response = restTemplate.postForEntity("/api/tasks", task, TaskResponseDto.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getId()).isNotNull();
@@ -100,22 +106,22 @@ class TaskControllerTest {
 
   @Test
   void createTask_negative_nullTitle_returns400() {
-    Task task = new Task();
+    TaskCreateDto task = new TaskCreateDto();
 
-    ResponseEntity<Task> response = restTemplate.postForEntity("/api/tasks", task, Task.class);
+    ResponseEntity<TaskResponseDto> response = restTemplate.postForEntity("/api/tasks", task, TaskResponseDto.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
   void updateTask_positive_returns200() {
-    Task update = new Task();
+    TaskUpdateDto update = new TaskUpdateDto();
     update.setTitle("Updated Title");
     update.setDescription("Updated Description");
     update.setCompleted(true);
 
-    HttpEntity<Task> request = new HttpEntity<>(update);
-    ResponseEntity<Task> response = restTemplate.exchange(
-        "/api/tasks/" + createdTaskId, HttpMethod.PUT, request, Task.class);
+    HttpEntity<TaskUpdateDto> request = new HttpEntity<>(update);
+    ResponseEntity<TaskResponseDto> response = restTemplate.exchange(
+      "/api/tasks/" + createdTaskId, HttpMethod.PUT, request, TaskResponseDto.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
@@ -125,12 +131,12 @@ class TaskControllerTest {
 
   @Test
   void updateTask_negative_notFound() {
-    Task update = new Task();
+    TaskUpdateDto update = new TaskUpdateDto();
     update.setTitle("Ghost Task");
 
-    HttpEntity<Task> request = new HttpEntity<>(update);
-    ResponseEntity<Task> response = restTemplate.exchange(
-        "/api/tasks/999999", HttpMethod.PUT, request, Task.class);
+    HttpEntity<TaskUpdateDto> request = new HttpEntity<>(update);
+    ResponseEntity<TaskResponseDto> response = restTemplate.exchange(
+      "/api/tasks/999999", HttpMethod.PUT, request, TaskResponseDto.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
