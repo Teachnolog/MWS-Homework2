@@ -11,10 +11,10 @@ import java.lang.annotation.Target;
 /**
  * Валидация, проверяющая что dueDate не ранее даты создания.
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = DueDateNotBeforeCreationValidator.class)
-public @interface DueDateNotBeforeCreation {
+@Constraint(validatedBy = DueDateNotInPastValidator.class)
+public @interface DueDateNotInPast {
   String message() default "Due date cannot be earlier than creation date";
 
   Class<?>[] groups() default {};

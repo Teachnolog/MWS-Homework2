@@ -21,11 +21,13 @@ public class FavoritesController {
   private static final String FAVORITES_KEY = "favoriteTaskIds";
 
   private final TaskService taskService;
+  private final FavoritesService favoritesService;
   private final TaskMapper taskMapper;
 
   public FavoritesController(TaskService taskService, FavoritesService favoritesService,
-      TaskMapper taskMapper) {
+                             TaskMapper taskMapper) {
     this.taskService = taskService;
+    this.favoritesService = favoritesService;
     this.taskMapper = taskMapper;
   }
 
@@ -33,10 +35,7 @@ public class FavoritesController {
   public ResponseEntity<Void> addToFavorites(@PathVariable Long taskId, HttpSession session) {
     @SuppressWarnings("unchecked")
     Set<Long> favorites = (Set<Long>) session.getAttribute(FAVORITES_KEY);
-    if (favorites == null) {
-      favorites = new java.util.HashSet<>();
-    }
-    favorites.add(taskId);
+    favorites = favoritesService.addToFavorites(favorites, taskId);
     session.setAttribute(FAVORITES_KEY, favorites);
     return ResponseEntity.ok().build();
   }
@@ -45,10 +44,8 @@ public class FavoritesController {
   public ResponseEntity<Void> removeFromFavorites(@PathVariable Long taskId, HttpSession session) {
     @SuppressWarnings("unchecked")
     Set<Long> favorites = (Set<Long>) session.getAttribute(FAVORITES_KEY);
-    if (favorites != null) {
-      favorites.remove(taskId);
-      session.setAttribute(FAVORITES_KEY, favorites);
-    }
+    favorites = favoritesService.removeFromFavorites(favorites, taskId);
+    session.setAttribute(FAVORITES_KEY, favorites);
     return ResponseEntity.ok().build();
   }
 
@@ -61,13 +58,12 @@ public class FavoritesController {
     }
 
     List<TaskResponseDto> favoriteTasks = favorites.stream()
-        .map(id -> taskService.getTaskById(id)
-            .map(taskMapper::toResponseDto)
-            .orElse(null))
-        .filter(dto -> dto != null)
-        .toList();
+            .map(id -> taskService.getTaskById(id)
+                    .map(taskMapper::toResponseDto)
+                    .orElse(null))
+            .filter(dto -> dto != null)
+            .toList();
 
     return ResponseEntity.ok(favoriteTasks);
   }
 }
-

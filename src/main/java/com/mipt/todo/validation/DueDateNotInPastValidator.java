@@ -9,16 +9,15 @@ import java.time.LocalDate;
 /**
  * Провайдер валидации для проверки что dueDate не ранее текущей даты.
  */
-public class DueDateNotBeforeCreationValidator
-    implements ConstraintValidator<DueDateNotBeforeCreation, TaskUpdateDto> {
+public class DueDateNotInPastValidator
+    implements ConstraintValidator<DueDateNotInPast, TaskUpdateDto> {
 
   @Override
   public boolean isValid(TaskUpdateDto value, ConstraintValidatorContext context) {
     if (value == null || value.getDueDate() == null) {
       return true;
     }
-    LocalDate today = LocalDate.now();
-    return !value.getDueDate().isBefore(today);
+    return !value.getDueDate().isBefore(LocalDate.now());
   }
 }
 

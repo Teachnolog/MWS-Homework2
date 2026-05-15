@@ -38,7 +38,9 @@ class TaskControllerTest {
 
   @AfterEach
   void tearDown() {
-    restTemplate.delete("/api/tasks/" + createdTaskId);
+    ResponseEntity<Void> response = restTemplate.exchange(
+            "/api/tasks/" + createdTaskId, HttpMethod.DELETE, null, Void.class);
+    assertThat(response.getStatusCode()).isIn(HttpStatus.NO_CONTENT, HttpStatus.NOT_FOUND);
   }
 
   @Test

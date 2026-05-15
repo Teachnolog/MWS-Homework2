@@ -35,7 +35,7 @@ public class PreferencesController {
     jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, value);
     cookie.setPath("/");
     cookie.setMaxAge(30 * 24 * 60 * 60); // 30 дней
-    cookie.setHttpOnly(false);
+    cookie.setHttpOnly(true);
     return cookie;
   }
 }
