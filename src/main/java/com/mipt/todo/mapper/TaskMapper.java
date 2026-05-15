@@ -1,0 +1,31 @@
+package com.mipt.todo.mapper;
+
+import com.mipt.todo.dto.TaskCreateDto;
+import com.mipt.todo.dto.TaskResponseDto;
+import com.mipt.todo.dto.TaskUpdateDto;
+import com.mipt.todo.model.Task;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+/**
+ * Маппер для конвертации между Task и DTO с использованием MapStruct.
+ */
+@Mapper(componentModel = "spring")
+public interface TaskMapper {
+
+  /**
+   * Преобразует DTO создания в сущность Task.
+   */
+  Task toEntity(TaskCreateDto dto);
+
+  /**
+   * Частичное обновление существующей сущности на основе DTO.
+   */
+  void updateEntity(TaskUpdateDto dto, @MappingTarget Task task);
+
+  /**
+   * Преобразует сущность Task в DTO ответа.
+   */
+  TaskResponseDto toResponseDto(Task task);
+}
+
