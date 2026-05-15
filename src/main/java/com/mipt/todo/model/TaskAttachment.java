@@ -1,14 +1,23 @@
 package com.mipt.todo.model;
 
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
 /**
- * Модель вложения к задаче.
+ * JPA-сущность вложения к задаче.
  */
+@Entity
+@Table(name = "task_attachments")
 public class TaskAttachment {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  private Long taskId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "task_id", nullable = false)
+  private Task task;
+
   private String fileName;
   private String storedFileName;
   private String contentType;
@@ -17,10 +26,10 @@ public class TaskAttachment {
 
   public TaskAttachment() {}
 
-  public TaskAttachment(Long id, Long taskId, String fileName, String storedFileName,
+  public TaskAttachment(Long id, Task task, String fileName, String storedFileName,
       String contentType, long size, LocalDateTime uploadedAt) {
     this.id = id;
-    this.taskId = taskId;
+    this.task = task;
     this.fileName = fileName;
     this.storedFileName = storedFileName;
     this.contentType = contentType;
@@ -31,8 +40,8 @@ public class TaskAttachment {
   public Long getId() { return id; }
   public void setId(Long id) { this.id = id; }
 
-  public Long getTaskId() { return taskId; }
-  public void setTaskId(Long taskId) { this.taskId = taskId; }
+  public Task getTask() { return task; }
+  public void setTask(Task task) { this.task = task; }
 
   public String getFileName() { return fileName; }
   public void setFileName(String fileName) { this.fileName = fileName; }
@@ -49,4 +58,3 @@ public class TaskAttachment {
   public LocalDateTime getUploadedAt() { return uploadedAt; }
   public void setUploadedAt(LocalDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
 }
-

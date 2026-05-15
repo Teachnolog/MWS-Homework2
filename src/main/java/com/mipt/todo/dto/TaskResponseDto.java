@@ -4,6 +4,7 @@ import com.mipt.todo.model.Priority;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * DTO для возврата полной информации о задаче клиенту.
@@ -18,6 +19,7 @@ public class TaskResponseDto {
   private LocalDate dueDate;
   private Priority priority;
   private Set<String> tags;
+  private Set<AttachmentResponseDto> attachments = new HashSet<>();
 
   public TaskResponseDto() {}
 
@@ -56,5 +58,8 @@ public class TaskResponseDto {
 
   public Set<String> getTags() { return tags; }
   public void setTags(Set<String> tags) { this.tags = tags; }
+
+  public Set<AttachmentResponseDto> getAttachments() { return attachments; }
+  public void setAttachments(Set<AttachmentResponseDto> attachments) { this.attachments = attachments; }
 }
 

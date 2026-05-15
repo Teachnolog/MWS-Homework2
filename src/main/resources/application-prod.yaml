@@ -4,3 +4,16 @@ logging:
     org.springframework: WARN
 server:
   port: 8081
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/todo_prod}
+    username: ${DB_USER:todo}
+    password: ${DB_PASSWORD:todo}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+

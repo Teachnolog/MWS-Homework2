@@ -1,7 +1,10 @@
 package com.mipt.todo.service;
 
+import com.mipt.todo.model.Task;
 import com.mipt.todo.model.TaskAttachment;
 import com.mipt.todo.repository.TaskAttachmentRepository;
+import com.mipt.todo.repository.TaskRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,9 +37,12 @@ public class AttachmentService {
   private long maxFileSize;
 
   private final TaskAttachmentRepository attachmentRepository;
+  private final TaskRepository taskRepository;
 
-  public AttachmentService(TaskAttachmentRepository attachmentRepository) {
+  public AttachmentService(@Qualifier("taskAttachmentRepository") TaskAttachmentRepository attachmentRepository,
+      TaskRepository taskRepository) {
     this.attachmentRepository = attachmentRepository;
+    this.taskRepository = taskRepository;
   }
 
   public TaskAttachment storeAttachment(Long taskId, MultipartFile file) throws IOException {
@@ -56,8 +62,11 @@ public class AttachmentService {
     Files.copy(file.getInputStream(), filePath);
     log.info("File stored: {}", filePath);
 
+    Task task = taskRepository.findById(taskId)
+        .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
     TaskAttachment attachment = new TaskAttachment();
-    attachment.setTaskId(taskId);
+    attachment.setTask(task);
     attachment.setFileName(file.getOriginalFilename());
     attachment.setStoredFileName(storedFileName);
     attachment.setContentType(file.getContentType());
@@ -98,7 +107,7 @@ public class AttachmentService {
   }
 
   public List<TaskAttachment> getAttachmentsByTaskId(Long taskId) {
-    return attachmentRepository.findByTaskId(taskId);
+    return attachmentRepository.findByTask_Id(taskId);
   }
 }
 

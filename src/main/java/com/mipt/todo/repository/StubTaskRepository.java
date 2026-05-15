@@ -10,28 +10,42 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Stub-репозиторий с предзаполненными данными для демонстрации @Bean и @Qualifier.
  */
-public class StubTaskRepository implements TaskRepository {
+public class StubTaskRepository {
 
   private final List<Task> tasks = new ArrayList<>();
   private final AtomicLong idCounter = new AtomicLong(1);
 
   public StubTaskRepository() {
-    tasks.add(new Task(idCounter.getAndIncrement(), "Buy groceries", "Milk, eggs, bread", false));
-    tasks.add(new Task(idCounter.getAndIncrement(), "Read a book", "Finish the Spring Boot book", true));
-    tasks.add(new Task(idCounter.getAndIncrement(), "Exercise", "30 minutes of jogging", false));
+    Task t1 = new Task();
+    t1.setId(idCounter.getAndIncrement());
+    t1.setTitle("Buy groceries");
+    t1.setDescription("Milk, eggs, bread");
+    t1.setCompleted(false);
+    tasks.add(t1);
+
+    Task t2 = new Task();
+    t2.setId(idCounter.getAndIncrement());
+    t2.setTitle("Read a book");
+    t2.setDescription("Finish the Spring Boot book");
+    t2.setCompleted(true);
+    tasks.add(t2);
+
+    Task t3 = new Task();
+    t3.setId(idCounter.getAndIncrement());
+    t3.setTitle("Exercise");
+    t3.setDescription("30 minutes of jogging");
+    t3.setCompleted(false);
+    tasks.add(t3);
   }
 
-  @Override
   public List<Task> findAll() {
     return new ArrayList<>(tasks);
   }
 
-  @Override
   public Optional<Task> findById(Long id) {
     return tasks.stream().filter(t -> t.getId().equals(id)).findFirst();
   }
 
-  @Override
   public Task save(Task task) {
     if (task.getId() == null) {
       task.setId(idCounter.getAndIncrement());
@@ -43,7 +57,6 @@ public class StubTaskRepository implements TaskRepository {
     return task;
   }
 
-  @Override
   public void deleteById(Long id) {
     tasks.removeIf(t -> t.getId().equals(id));
   }
