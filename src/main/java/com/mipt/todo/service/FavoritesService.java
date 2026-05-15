@@ -11,17 +11,19 @@ import java.util.Set;
 @Service
 public class FavoritesService {
 
-  public void addToFavorites(Set<Long> favorites, Long taskId) {
+  public Set<Long> addToFavorites(Set<Long> favorites, Long taskId) {
     if (favorites == null) {
       favorites = new HashSet<>();
     }
     favorites.add(taskId);
+    return favorites;
   }
 
-  public void removeFromFavorites(Set<Long> favorites, Long taskId) {
+  public Set<Long> removeFromFavorites(Set<Long> favorites, Long taskId) {
     if (favorites != null) {
       favorites.remove(taskId);
     }
+    return favorites;
   }
 
   public boolean isFavorite(Set<Long> favorites, Long taskId) {

@@ -30,9 +30,12 @@ public class GlobalExceptionHandler {
       HttpServletRequest request) {
     Map<String, Object> errors = new HashMap<>();
     ex.getBindingResult().getAllErrors().forEach(error -> {
-      String fieldName = ((FieldError) error).getField();
       String message = error.getDefaultMessage();
-      errors.put(fieldName, message);
+      if (error instanceof FieldError fieldError) {
+        errors.put(fieldError.getField(), message);
+      } else {
+        errors.put(error.getObjectName(), message);
+      }
     });
 
     ErrorResponse errorResponse = new ErrorResponse(

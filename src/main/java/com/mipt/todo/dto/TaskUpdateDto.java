@@ -1,6 +1,6 @@
 package com.mipt.todo.dto;
 
-import com.mipt.todo.validation.DueDateNotBeforeCreation;
+import com.mipt.todo.validation.DueDateNotInPast;
 
 import com.mipt.todo.model.Priority;
 import jakarta.validation.constraints.Size;
@@ -11,7 +11,7 @@ import java.util.Set;
  * DTO для обновления существующей задачи.
  * Все поля опциональны для частичного обновления.
  */
-@DueDateNotBeforeCreation
+@DueDateNotInPast(groups = OnUpdate.class)
 public class TaskUpdateDto {
 
   @Size(min = 3, max = 100, groups = OnUpdate.class, message = "Title length must be between 3 and 100")

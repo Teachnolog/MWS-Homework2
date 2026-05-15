@@ -13,10 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Контроллер для управления вложениями к задачам.
- */
 @RestController
 @RequestMapping("/api")
 public class AttachmentController {
@@ -29,18 +27,15 @@ public class AttachmentController {
 
   @PostMapping("/tasks/{taskId}/attachments")
   public ResponseEntity<AttachmentResponseDto> uploadAttachment(
-      @PathVariable Long taskId,
-      @RequestParam("file") MultipartFile file) {
+          @PathVariable Long taskId,
+          @RequestParam("file") MultipartFile file) {
     try {
       TaskAttachment attachment = attachmentService.storeAttachment(taskId, file);
-      if (attachment == null) {
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-      }
       AttachmentResponseDto dto = new AttachmentResponseDto(
-          attachment.getId(),
-          attachment.getFileName(),
-          attachment.getSize(),
-          attachment.getUploadedAt()
+              attachment.getId(),
+              attachment.getFileName(),
+              attachment.getSize(),
+              attachment.getUploadedAt()
       );
       return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     } catch (IOException e) {
@@ -51,23 +46,23 @@ public class AttachmentController {
   @GetMapping("/attachments/{attachmentId}")
   public ResponseEntity<Resource> downloadAttachment(@PathVariable Long attachmentId) {
     try {
-      java.util.Optional<TaskAttachment> maybe = attachmentService.getAttachment(attachmentId);
-      if (maybe == null || maybe.isEmpty()) {
+      Optional<TaskAttachment> maybe = attachmentService.getAttachment(attachmentId);
+      if (maybe.isEmpty()) {
         return ResponseEntity.notFound().build();
       }
       TaskAttachment attachment = maybe.get();
-      Resource resource = attachmentService.loadAsResource(attachmentId);
+      Resource resource = attachmentService.loadAsResource(attachment);
 
       return ResponseEntity.ok()
-          .header(HttpHeaders.CONTENT_DISPOSITION,
-              ContentDisposition.attachment()
-                  .filename(attachment.getFileName())
-                  .build()
-                  .toString())
-          .header(HttpHeaders.CONTENT_TYPE, attachment.getContentType())
-          .body(resource);
+              .header(HttpHeaders.CONTENT_DISPOSITION,
+                      ContentDisposition.attachment()
+                              .filename(attachment.getFileName())
+                              .build()
+                              .toString())
+              .header(HttpHeaders.CONTENT_TYPE, attachment.getContentType())
+              .body(resource);
     } catch (IOException e) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -85,9 +80,8 @@ public class AttachmentController {
   public ResponseEntity<List<AttachmentResponseDto>> getTaskAttachments(@PathVariable Long taskId) {
     List<TaskAttachment> attachments = attachmentService.getAttachmentsByTaskId(taskId);
     List<AttachmentResponseDto> dtos = attachments.stream()
-        .map(a -> new AttachmentResponseDto(a.getId(), a.getFileName(), a.getSize(), a.getUploadedAt()))
-        .toList();
+            .map(a -> new AttachmentResponseDto(a.getId(), a.getFileName(), a.getSize(), a.getUploadedAt()))
+            .toList();
     return ResponseEntity.ok(dtos);
   }
 }
-

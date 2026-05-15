@@ -22,9 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 
-/**
- * Сервис для работы с вложениями к задачам.
- */
 @Service
 public class AttachmentService {
 
@@ -53,21 +50,32 @@ public class AttachmentService {
       throw new IllegalArgumentException("File size exceeds maximum allowed size");
     }
 
-    Path uploadPath = Paths.get(uploadDir);
+    String originalFilename = file.getOriginalFilename();
+    if (originalFilename == null || originalFilename.isBlank()) {
+      throw new IllegalArgumentException("Original filename is missing");
+    }
+    String safeOriginalName = Paths.get(originalFilename).getFileName().toString();
+    safeOriginalName = safeOriginalName.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+
+    Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
     Files.createDirectories(uploadPath);
 
-    String storedFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-    Path filePath = uploadPath.resolve(storedFileName);
+    String storedFileName = UUID.randomUUID().toString() + "_" + safeOriginalName;
+    Path filePath = uploadPath.resolve(storedFileName).normalize();
 
-    Files.copy(file.getInputStream(), filePath);
+    if (!filePath.startsWith(uploadPath)) {
+      throw new SecurityException("Invalid file path detected");
+    }
+
+    file.transferTo(filePath.toFile());
     log.info("File stored: {}", filePath);
 
     Task task = taskRepository.findById(taskId)
         .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
     TaskAttachment attachment = new TaskAttachment();
-    attachment.setTask(task);
-    attachment.setFileName(file.getOriginalFilename());
+    attachment.setTaskId(taskId);
+    attachment.setFileName(safeOriginalName);
     attachment.setStoredFileName(storedFileName);
     attachment.setContentType(file.getContentType());
     attachment.setSize(file.getSize());
@@ -76,19 +84,12 @@ public class AttachmentService {
     return attachmentRepository.save(attachment);
   }
 
-  public Resource loadAsResource(Long attachmentId) throws IOException {
-    Optional<TaskAttachment> attachment = attachmentRepository.findById(attachmentId);
-    if (attachment.isEmpty()) {
-      throw new IOException("Attachment not found");
-    }
-
-    Path filePath = Paths.get(uploadDir).resolve(attachment.get().getStoredFileName());
+  public Resource loadAsResource(TaskAttachment attachment) throws IOException {
+    Path filePath = Paths.get(uploadDir).resolve(attachment.getStoredFileName()).normalize();
     Resource resource = new FileSystemResource(filePath);
-
     if (!resource.exists()) {
       throw new IOException("File not found on disk");
     }
-
     return resource;
   }
 
@@ -99,7 +100,7 @@ public class AttachmentService {
   public void deleteAttachment(Long attachmentId) throws IOException {
     Optional<TaskAttachment> attachment = attachmentRepository.findById(attachmentId);
     if (attachment.isPresent()) {
-      Path filePath = Paths.get(uploadDir).resolve(attachment.get().getStoredFileName());
+      Path filePath = Paths.get(uploadDir).resolve(attachment.get().getStoredFileName()).normalize();
       Files.deleteIfExists(filePath);
       attachmentRepository.deleteById(attachmentId);
       log.info("Attachment deleted: {}", attachmentId);
@@ -110,5 +111,3 @@ public class AttachmentService {
     return attachmentRepository.findByTask_Id(taskId);
   }
 }
-
-
