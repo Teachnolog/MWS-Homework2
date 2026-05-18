@@ -6,11 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -87,6 +90,62 @@ public class GlobalExceptionHandler {
         request.getRequestURI()
     );
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+  }
+
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ErrorResponse> handleBadCredentials(
+      BadCredentialsException ex,
+      HttpServletRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        HttpStatus.UNAUTHORIZED.value(),
+        "Unauthorized",
+        ex.getMessage(),
+        request.getRequestURI()
+    );
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+  }
+
+  @ExceptionHandler(ExternalApiException.class)
+  public ResponseEntity<ErrorResponse> handleExternalApiError(
+      ExternalApiException ex,
+      HttpServletRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        HttpStatus.BAD_GATEWAY.value(),
+        "Bad Gateway",
+        ex.getMessage(),
+        request.getRequestURI()
+    );
+    return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(errorResponse);
+  }
+
+  @ExceptionHandler(RequestNotPermitted.class)
+  public ResponseEntity<ErrorResponse> handleRateLimiter(
+      RequestNotPermitted ex,
+      HttpServletRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        HttpStatus.TOO_MANY_REQUESTS.value(),
+        "Too Many Requests",
+        "Rate limit exceeded for external API",
+        request.getRequestURI()
+    );
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(errorResponse);
+  }
+
+  @ExceptionHandler(CallNotPermittedException.class)
+  public ResponseEntity<ErrorResponse> handleCircuitOpen(
+      CallNotPermittedException ex,
+      HttpServletRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        HttpStatus.SERVICE_UNAVAILABLE.value(),
+        "Service Unavailable",
+        "External API circuit breaker is open",
+        request.getRequestURI()
+    );
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
   }
 
   @ExceptionHandler(Exception.class)
