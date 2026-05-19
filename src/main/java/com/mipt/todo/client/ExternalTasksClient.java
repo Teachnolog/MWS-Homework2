@@ -95,16 +95,14 @@ public class ExternalTasksClient {
     externalRestClient.delete()
         .uri(uriBuilder -> uriBuilder.path("/tasks/{id}").build(id))
         .accept(MediaType.APPLICATION_JSON)
-        .retrieve()
-        .onStatus(status -> status.value() == 404, (request, response) -> {
+        .exchange((request, response) -> {
+          HttpStatusCode status = response.getStatusCode();
+          if (status.is2xxSuccessful()) {
+            return null;
+          }
           String body = readBody(response);
-          throw mapError(response.getStatusCode(), body, response.getHeaders(), id);
-        })
-        .onStatus(HttpStatusCode::is5xxServerError, (request, response) -> {
-          String body = readBody(response);
-          throw mapError(response.getStatusCode(), body, response.getHeaders(), id);
-        })
-        .toBodilessEntity();
+          throw mapError(status, body, response.getHeaders(), id);
+        });
   }
 
   private void assertJsonContentType(HttpHeaders headers, String body, HttpStatusCode status) {
@@ -146,8 +144,8 @@ public class ExternalTasksClient {
       return new ExternalApiException("External API failure with status " + status.value());
     }
 
-    return new ExternalApiException(
-        "Unexpected status from external API: " + status.value() + ", body=" + limitBody(body));
+    log.warn("Unexpected status from external API: status={}, body={}", status.value(), limitBody(body));
+    return new ExternalApiException("External API returned unexpected error (status " + status.value() + ")");
   }
 
   private String extractProblemDetail(String body) {

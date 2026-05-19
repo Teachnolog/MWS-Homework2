@@ -56,6 +56,10 @@ public class JwtUtils {
     }
   }
 
+  public Claims getClaims(String token) {
+    return parseClaims(token);
+  }
+
   private Claims parseClaims(String token) {
     return Jwts.parser()
         .verifyWith(signingKey)
@@ -64,4 +68,3 @@ public class JwtUtils {
         .getBody();
   }
 }
-

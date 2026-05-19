@@ -1,11 +1,15 @@
 package com.mipt.todo.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class LoginResponseDto {
 
   private final String accessToken;
   private final String tokenType;
 
-  public LoginResponseDto(String accessToken) {
+  @JsonCreator
+  public LoginResponseDto(@JsonProperty("accessToken") String accessToken) {
     this.accessToken = accessToken;
     this.tokenType = "Bearer";
   }
@@ -18,4 +22,3 @@ public class LoginResponseDto {
     return tokenType;
   }
 }
-

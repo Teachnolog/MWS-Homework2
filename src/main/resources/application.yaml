@@ -25,10 +25,9 @@ logging:
 
 security:
   jwt:
-    secret: very-secret-jwt-signing-key-for-hsse-homework-2-please-change
-    expiration-seconds: 3600
+    secret: ${JWT_SECRET:default-dev-secret-not-for-production}
   password:
-    pepper: app-pepper-value
+    pepper: ${PASSWORD_PEPPER:default-dev-pepper-not-for-production}
 
 external:
   api:

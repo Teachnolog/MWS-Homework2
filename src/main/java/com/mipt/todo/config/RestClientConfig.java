@@ -21,10 +21,8 @@ public class RestClientConfig {
 
     return RestClient.builder()
         .baseUrl(baseUrl)
-        .defaultHeader("User-Agent", "MWS-Homework2-Gateway/1.0")
+        .defaultHeader("User-Agent", "MWS-Homework4-Gateway/1.0")
         .requestFactory(requestFactory)
         .build();
   }
 }
-
-

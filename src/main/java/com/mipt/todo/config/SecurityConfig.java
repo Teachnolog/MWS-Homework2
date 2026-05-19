@@ -51,15 +51,16 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
               "/api/auth/login",
+              "/api/v1/auth/login",
               "/external/**",
               "/actuator/health",
-              "/actuator/metrics/**",
               "/error")
             .permitAll()
-            .requestMatchers("/api/profile").hasRole("USER")
-            .requestMatchers("/api/docs").hasAuthority("READ_PRIVILEGE")
+            .requestMatchers("/actuator/metrics/**").authenticated()
+            .requestMatchers("/api/v1/profile").hasRole("USER")
+            .requestMatchers("/api/v1/docs").hasAuthority("READ_PRIVILEGE")
             .requestMatchers("/api/**").authenticated()
-            .anyRequest().permitAll())
+            .anyRequest().authenticated())
         ;
 
     JwtAuthFilter jwtAuthFilter = jwtAuthFilterProvider.getIfAvailable();
@@ -96,6 +97,3 @@ public class SecurityConfig {
     return configuration.getAuthenticationManager();
   }
 }
-
-
-

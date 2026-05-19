@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.Claims;
 
 @Component
 @ConditionalOnBean(JwtUtils.class)
@@ -44,9 +45,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     String token = authHeader.substring(7);
     try {
-      if (jwtUtils.isTokenValid(token)
-          && SecurityContextHolder.getContext().getAuthentication() == null) {
-        String username = jwtUtils.extractUsername(token);
+      Claims claims = jwtUtils.getClaims(token);
+      if (claims != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        String username = claims.getSubject();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -71,4 +72,3 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     return token.substring(0, 6) + "..." + token.substring(token.length() - 6);
   }
 }
-

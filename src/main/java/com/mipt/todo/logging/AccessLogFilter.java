@@ -25,15 +25,15 @@ public class AccessLogFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    long start = System.currentTimeMillis();
+    long start = System.nanoTime();
     try {
       filterChain.doFilter(request, response);
     } finally {
-      long took = System.currentTimeMillis() - start;
+      long tookNanos = System.nanoTime() - start;
+      long tookMillis = tookNanos / 1_000_000;
       String traceId = MDC.get(TraceIdFilter.TRACE_ID_MDC_KEY);
       log.info("HTTP {} {} -> status={} timeMs={} trace={}",
-          request.getMethod(), request.getRequestURI(), response.getStatus(), took, traceId);
+              request.getMethod(), request.getRequestURI(), response.getStatus(), tookMillis, traceId);
     }
   }
 }
-

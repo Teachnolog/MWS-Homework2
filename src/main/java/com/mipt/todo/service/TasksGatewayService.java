@@ -26,15 +26,12 @@ public class TasksGatewayService {
     URI location = externalTasksClient.createTask(dto);
     Long createdId = extractIdFromLocation(location);
 
-    if (createdId == null) {
-      ExternalTaskResponseDto response = new ExternalTaskResponseDto();
-      response.setTitle(dto.getTitle());
-      response.setDescription(dto.getDescription());
-      response.setCompleted(false);
-      return response;
-    }
-
-    return externalTasksClient.getTaskById(createdId);
+    ExternalTaskResponseDto response = new ExternalTaskResponseDto();
+    response.setId(createdId);
+    response.setTitle(dto.getTitle());
+    response.setDescription(dto.getDescription());
+    response.setCompleted(false);
+    return response;
   }
 
   @RateLimiter(name = "externalApi")
@@ -56,12 +53,7 @@ public class TasksGatewayService {
   }
 
   public ExternalTaskResponseDto createTaskFallback(ExternalTaskCreateDto dto, Throwable throwable) {
-    ExternalTaskResponseDto fallback = new ExternalTaskResponseDto();
-    fallback.setId(-1L);
-    fallback.setTitle("fallback: " + dto.getTitle());
-    fallback.setDescription("External API is unavailable");
-    fallback.setCompleted(false);
-    return fallback;
+    throw new ExternalApiException("External API unavailable for createTask: " + throwable.getMessage());
   }
 
   public ExternalTaskResponseDto getTaskByIdFallback(Long id, Throwable throwable) {
@@ -85,13 +77,11 @@ public class TasksGatewayService {
     if (location == null || location.getPath() == null) {
       return null;
     }
-
     String path = location.getPath();
     int lastSlash = path.lastIndexOf('/');
     if (lastSlash < 0 || lastSlash == path.length() - 1) {
       return null;
     }
-
     try {
       return Long.valueOf(path.substring(lastSlash + 1));
     } catch (NumberFormatException ex) {
@@ -99,4 +89,3 @@ public class TasksGatewayService {
     }
   }
 }
-

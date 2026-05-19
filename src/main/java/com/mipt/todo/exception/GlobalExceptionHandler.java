@@ -2,6 +2,7 @@ package com.mipt.todo.exception;
 
 import com.mipt.todo.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,20 @@ public class GlobalExceptionHandler {
     );
     errorResponse.setDetails(errors);
 
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ErrorResponse> handleConstraintViolation(
+          ConstraintViolationException ex,
+          HttpServletRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.BAD_REQUEST.value(),
+            "Bad Request",
+            ex.getMessage(),
+            request.getRequestURI()
+    );
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
@@ -110,14 +125,21 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleExternalApiError(
       ExternalApiException ex,
       HttpServletRequest request) {
+    String message = ex.getMessage();
+    HttpStatus status = HttpStatus.BAD_GATEWAY;
+
+    if (message != null && message.toLowerCase().contains("rate limit")) {
+      status = HttpStatus.TOO_MANY_REQUESTS;
+    }
+
     ErrorResponse errorResponse = new ErrorResponse(
         Instant.now(),
-        HttpStatus.BAD_GATEWAY.value(),
-        "Bad Gateway",
-        ex.getMessage(),
+        status.value(),
+        status.getReasonPhrase(),
+        message,
         request.getRequestURI()
     );
-    return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(errorResponse);
+    return ResponseEntity.status(status).body(errorResponse);
   }
 
   @ExceptionHandler(RequestNotPermitted.class)
@@ -163,4 +185,3 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 }
-
