@@ -9,5 +9,8 @@
 - Observability: `X-Trace-Id`, access logs, `/actuator/health`, `/actuator/metrics`
 - Resilience4j: `externalApi` rate limiter + circuit breaker with fallback in gateway service
 
-Local integration tests
-- Чтобы запустить интеграционные тесты локально (требуется Docker), выполните: `mvn test`. Тесты с Testcontainers будут выполнены автоматически, если Docker доступен; в противном случае они будут пропущены.
+## Local integration tests
+
+- Для запуска интеграционных тестов локально требуется **Docker**.
+- Выполните команду: `mvn test`.
+- Если Docker не запущен или недоступен, тесты, использующие Testcontainers, будут **автоматически пропущены** (благодаря настройке `@Testcontainers(disabledWithoutDocker = true)`).

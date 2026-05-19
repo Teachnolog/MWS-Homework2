@@ -2,32 +2,26 @@ package com.mipt.todo.repository;
 
 import com.mipt.todo.model.Task;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Assumptions;
-import org.testcontainers.DockerClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 class TaskRepositoryIntegrationTest {
-
-  @BeforeAll
-  static void checkDocker() {
-    Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker not available, skipping integration test");
-  }
 
   @Container
   public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
@@ -40,6 +34,8 @@ class TaskRepositoryIntegrationTest {
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
+    registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+    registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.PostgreSQLDialect");
   }
 
   @Autowired
