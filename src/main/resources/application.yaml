@@ -22,3 +22,39 @@ spring:
 logging:
   level:
     com.mipt.todo: INFO
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:default-dev-secret-not-for-production}
+  password:
+    pepper: ${PASSWORD_PEPPER:default-dev-pepper-not-for-production}
+
+external:
+  api:
+    base-url: ${EXTERNAL_API_BASE_URL:http://localhost:8080/external/v1}
+    connect-timeout-ms: 1000
+    read-timeout-ms: 1500
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      externalApi:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 4
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 2
+        waitDurationInOpenState: 10s
+  ratelimiter:
+    instances:
+      externalApi:
+        limitForPeriod: 5
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0s
+

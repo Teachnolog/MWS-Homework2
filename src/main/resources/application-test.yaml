@@ -13,3 +13,9 @@ spring:
   sql:
     init:
       mode: never
+
+security:
+  jwt:
+    secret: test-secret-key-for-unit-tests1234
+  password:
+    pepper: test-pepper-value
